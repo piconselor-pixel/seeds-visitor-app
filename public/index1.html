@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>🛡️ Seeds FinCap - Visitor Check-in</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; 
+            padding: 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        .checkin-form { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 40px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { color: #007bff; font-size: 2.5em; }
+        .logo p { color: #666; font-size: 1.2em; }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
+        input, textarea, select { 
+            width: 100%; padding: 15px; border: 2px solid #e1e5e9; 
+            border-radius: 12px; font-size: 16px; transition: all 0.3s;
+        }
+        input:focus, select:focus, textarea:focus { 
+            outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+        }
+        .btn { 
+            width: 100%; padding: 18px; background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white; border: none; border-radius: 12px; font-size: 18px; 
+            font-weight: 600; cursor: pointer; transition: all 0.3s;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,123,255,0.3); }
+        .btn-success { background: linear-gradient(45deg, #28a745, #1e7e34); }
+        .btn-success:hover { box-shadow: 0 10px 25px rgba(40,167,69,0.3); }
+        .camera-section { 
+            background: #f8f9fa; padding: 25px; border-radius: 15px; 
+            text-align: center; margin: 25px 0;
+        }
+        #video { width: 100%; max-width: 400px; height: 300px; border-radius: 15px; }
+        #photo { width: 100%; max-width: 400px; height: 300px; border-radius: 15px; display: none; }
+        #captureBtn { 
+            background: #ff6b35; color: white; border: none; padding: 15px 30px; 
+            border-radius: 50px; font-size: 16px; cursor: pointer; margin-top: 15px;
+        }
+        #captureBtn:disabled { background: #ccc; cursor: not-allowed; }
+        .qr-section { 
+            background: #e8f5e8; padding: 25px; border-radius: 15px; 
+            text-align: center; margin-top: 25px; display: none;
+        }
+        .qr-code { max-width: 200px; margin: 0 auto; }
+        .whatsapp-share { 
+            display: inline-block; background: #25D366; color: white; 
+            padding: 15px 30px; text-decoration: none; border-radius: 50px; 
+            font-weight: 600; margin-top: 15px;
+        }
+        .status { padding: 15px; border-radius: 10px; margin: 20px 0; font-weight: 600; }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .recent-visitors { margin-top: 40px; }
+        .visitor-card { 
+            background: white; padding: 20px; border-radius: 12px; 
+            margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .admin-link { 
+            text-align: center; margin-top: 30px; 
+            color: #007bff; text-decoration: none; font-weight: 600;
+        }
+        .admin-link:hover { text-decoration: underline; }
+        .hidden { display: none; }
+        @media (max-width: 768px) {
+            .checkin-form { padding: 20px; margin: 10px; }
+            #video, #photo { max-width: 100%; height: 250px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Direct Check-in Form (NO LOGIN REQUIRED) -->
+        <div id="mainApp" class="checkin-form">
+            <div class="logo">
+                <h1>🛡️ Visitor Check-in</h1>
+                <p>Seeds FinCap Pvt Ltd - Reception</p>
+            </div>
+            
+            <div class="form-group">
+                <label>👤 Visitor Name *</label>
+                <input type="text" id="visitorName" required>
+            </div>
+            
+            <div class="form-group">
+                <label>📱 Mobile Number</label>
+                <input type="tel" id="mobile" placeholder="9876543210">
+            </div>
+            
+            <div class="form-group">
+                <label>👥 Meeting With *</label>
+                <input type="text" id="hostEmployee" placeholder="Employee Name" required>
+            </div>
+            
+            <div class="form-group">
+                <label>📧 Host Email *</label>
+                <input type="email" id="hostEmail" placeholder="employee@seedsfincap.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label>📝 Purpose of Visit *</label>
+                <textarea id="purpose" rows="3" placeholder="Meeting, Documentation, Delivery etc." required></textarea>
+            </div>
+
+            <!-- Camera Section -->
+            <div class="camera-section">
+                <label>📸 Capture Visitor Photo *</label>
+                <video id="video" autoplay muted playsinline></video>
+                <br>
+                <button id="captureBtn" onclick="capturePhoto()">📷 Capture Photo</button>
+                <canvas id="canvas" style="display: none;"></canvas>
+                <img id="photo" alt="Captured photo">
+            </div>
+
+            <button class="btn btn-success" onclick="submitVisitor()" id="submitBtn" disabled>
+                ✅ Check-in Visitor & Send Notification
+            </button>
+
+            <div id="status"></div>
+
+            <!-- QR Code Section -->
+            <div id="qrSection" class="qr-section">
+                <h3>✅ Check-in Successful!</h3>
+                <p>Share this QR code pass with visitor:</p>
+                <img id="qrCode" class="qr-code" src="">
+                <br>
+                <a id="whatsappLink" class="whatsapp-share" target="_blank">📱 Share on WhatsApp</a>
+                <br><br>
+                <button class="btn" onclick="newVisitor()">➕ New Visitor</button>
+            </div>
+
+            <!-- Recent Visitors -->
+            <div class="recent-visitors">
+                <h3>📋 Recent Visitors (Last 10)</h3>
+                <div id="visitorsList">Loading...</div>
+            </div>
+
+            <!-- Admin Link -->
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="admin.html" class="admin-link">🔐 Admin Security Dashboard →</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let stream, photoBase64, qrCodeData;
+        const API_BASE = '/api';
+
+        // Start camera immediately
+        navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } 
+        }).then(s => {
+            stream = s;
+            document.getElementById('video').srcObject = stream;
+        }).catch(err => {
+            console.error('Camera access denied:', err);
+            document.querySelector('.camera-section label').innerHTML += '<br><span style="color:red;">Camera access required for photo capture</span>';
+        });
+
+        function capturePhoto() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const photo = document.getElementById('photo');
+            
+            if (!video.videoWidth) {
+                alert('Please wait for camera to load');
+                return;
+            }
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            photoBase64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+            photo.src = canvas.toDataURL('image/jpeg', 0.8);
+            photo.style.display = 'block';
+            document.getElementById('video').style.display = 'none';
+            document.getElementById('captureBtn').textContent = '✅ Photo Captured';
+            document.getElementById('captureBtn').disabled = true;
+            document.getElementById('submitBtn').disabled = false;
+            
+            showStatus('Photo captured successfully!', 'success');
+        }
+
+        async function submitVisitor() {
+            // Basic validation
+            const requiredFields = ['visitorName', 'hostEmployee', 'hostEmail', 'purpose'];
+            for (let field of requiredFields) {
+                if (!document.getElementById(field).value.trim()) {
+                    showStatus('Please fill all required fields!', 'error');
+                    return;
+                }
+            }
+            
+            if (!photoBase64) {
+                showStatus('Please capture visitor photo first!', 'error');
+                return;
+            }
+
+            const data = {
+                visitor_name: document.getElementById('visitorName').value.trim(),
+                mobile: document.getElementById('mobile').value.trim(),
+                host_employee: document.getElementById('hostEmployee').value.trim(),
+                host_email: document.getElementById('hostEmail').value.trim(),
+                purpose: document.getElementById('purpose').value.trim(),
+                photo_base64: photoBase64
+            };
+            
+            try {
+                document.getElementById('submitBtn').textContent = '⏳ Processing...';
+                document.getElementById('submitBtn').disabled = true;
+                
+                const res = await fetch(`${API_BASE}/visitors`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await res.json();
+                
+                if (result.success) {
+                    qrCodeData = result.qrCode;
+                    document.getElementById('qrCode').src = qrCodeData;
+                    const mobile = data.mobile || '9876543210';
+                    document.getElementById('whatsappLink').href = 
+                        `https://wa.me/91${mobile}?text=🛡️%20Seeds%20FinCap%20Visitor%20Pass:%20${encodeURIComponent(result.qrCode)}`;
+                    document.getElementById('qrSection').style.display = 'block';
+                    showStatus(result.message, 'success');
+                    loadVisitors();
+                    scrollTo(0, 0);
+                } else {
+                    showStatus(result.error || 'Check-in failed', 'error');
+                }
+            } catch (err) {
+                showStatus('Error: ' + err.message, 'error');
+                console.error('Submit error:', err);
+            } finally {
+                document.getElementById('submitBtn').textContent = '✅ Check-in Visitor & Send Notification';
+                document.getElementById('submitBtn').disabled = !photoBase64;
+            }
+        }
+
+        function newVisitor() {
+            document.getElementById('qrSection').style.display = 'none';
+            document.querySelectorAll('input, textarea').forEach(el => el.value = '');
+            resetCamera();
+            document.getElementById('visitorName').focus();
+        }
+
+        function resetCamera() {
+            const video = document.getElementById('video');
+            const photo = document.getElementById('photo');
+            const captureBtn = document.getElementById('captureBtn');
+            
+            photo.style.display = 'none';
+            video.style.display = 'block';
+            captureBtn.textContent = '📷 Capture Photo';
+            captureBtn.disabled = false;
+            document.getElementById('submitBtn').disabled = true;
+            photoBase64 = null;
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => status.innerHTML = '', 8000);
+        }
+
+        async function loadVisitors() {
+            try {
+                const res = await fetch(`${API_BASE}/visitors`);
+                const visitors = await res.json();
+                
+                document.getElementById('visitorsList').innerHTML = visitors.slice(0, 10).map(v => `
+                    <div class="visitor-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${v.visitor_name}</strong><br>
+                                <small style="color: #666;">
+                                    👥 ${v.host_employee} | 📱 ${v.mobile || 'N/A'} | 
+                                    ⏰ ${new Date(v.checkin_time).toLocaleTimeString()}
+                                </small>
+                            </div>
+                            <span style="font-size: 12px; padding: 4px 8px; border-radius: 12px; 
+                                       background: ${v.status === 'checked_in' ? '#d4edda' : '#f8d7da'};
+                                       color: ${v.status === 'checked_in' ? '#155724' : '#721c24'};">
+                                ${v.status.replace('_', ' ').toUpperCase()}
+                            </span>
+                        </div>
+                    </div>
+                `).join('') || '<p>No recent visitors</p>';
+            } catch (err) {
+                document.getElementById('visitorsList').innerHTML = '<p>Recent visitors unavailable</p>';
+            }
+        }
+
+        // Auto-load recent visitors and refresh every 30s
+        loadVisitors();
+        setInterval(loadVisitors, 30000);
+
+        // Enter key submits form
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('submitBtn').disabled) {
+                submitVisitor();
+            }
+        });
+    </script>
+</body>
+</html>

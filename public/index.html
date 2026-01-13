@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>🛡️ Seeds FinCap - Visitor Check-in</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; 
+            padding: 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        .login-modal, .checkin-form { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 40px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        .login-modal { max-width: 400px; margin: 100px auto; }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { color: #007bff; font-size: 2.5em; }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
+        input, textarea, select { 
+            width: 100%; padding: 15px; border: 2px solid #e1e5e9; 
+            border-radius: 12px; font-size: 16px; transition: all 0.3s;
+        }
+        input:focus, select:focus, textarea:focus { 
+            outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+        }
+        .btn { 
+            width: 100%; padding: 18px; background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white; border: none; border-radius: 12px; font-size: 18px; 
+            font-weight: 600; cursor: pointer; transition: all 0.3s;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,123,255,0.3); }
+        .btn-success { background: linear-gradient(45deg, #28a745, #1e7e34); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+        .camera-section { 
+            background: #f8f9fa; padding: 25px; border-radius: 15px; 
+            text-align: center; margin: 25px 0;
+        }
+        #video { width: 100%; max-width: 400px; height: 300px; border-radius: 15px; }
+        #photo { width: 100%; max-width: 400px; height: 300px; border-radius: 15px; display: none; }
+        #captureBtn { 
+            background: #ff6b35; color: white; border: none; padding: 15px 30px; 
+            border-radius: 50px; font-size: 16px; cursor: pointer; margin-top: 15px;
+        }
+        #captureBtn:disabled { background: #ccc; cursor: not-allowed; }
+        .qr-section { 
+            background: #e8f5e8; padding: 25px; border-radius: 15px; 
+            text-align: center; margin-top: 25px; display: none;
+        }
+        .qr-code { max-width: 200px; margin: 0 auto; }
+        .whatsapp-share { 
+            display: inline-block; background: #25D366; color: white; 
+            padding: 15px 30px; text-decoration: none; border-radius: 50px; 
+            font-weight: 600; margin-top: 15px;
+        }
+        .status { padding: 15px; border-radius: 10px; margin: 20px 0; font-weight: 600; }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .recent-visitors { margin-top: 40px; }
+        .visitor-card { 
+            background: white; padding: 20px; border-radius: 12px; 
+            margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .hidden { display: none; }
+        .logout-btn { 
+            position: fixed; top: 20px; right: 20px; 
+            background: #dc3545; color: white; border: none; 
+            padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Modal (REQUIRED FOR SUBMIT) -->
+        <div id="loginModal" class="login-modal">
+            <div class="logo">
+                <h1>🔐 Reception Login</h1>
+                <p>Seeds FinCap Visitor System</p>
+            </div>
+            <div class="form-group">
+                <input type="text" id="loginUsername" placeholder="admin@seedsfincap.com" value="admin@seedsfincap.com">
+            </div>
+            <div class="form-group">
+                <input type="password" id="loginPassword" placeholder="admin123" value="admin123">
+            </div>
+            <button class="btn" onclick="login()">🚀 Start Check-in</button>
+            <p style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
+                Default: admin@seedsfincap.com / admin123
+            </p>
+        </div>
+
+        <!-- Main Check-in Form -->
+        <div id="mainApp" class="checkin-form hidden">
+            <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+            
+            <div class="logo">
+                <h1>🛡️ Visitor Check-in</h1>
+                <p>Seeds FinCap Pvt Ltd - Reception</p>
+                <div id="userInfo" style="font-size: 14px; color: #666;"></div>
+            </div>
+            
+            <div class="form-group">
+                <label>👤 Visitor Name *</label>
+                <input type="text" id="visitorName" required>
+            </div>
+            
+            <div class="form-group">
+                <label>📱 Mobile</label>
+                <input type="tel" id="mobile">
+            </div>
+            
+            <div class="form-group">
+                <label>👥 Meeting With *</label>
+                <input type="text" id="hostEmployee">
+            </div>
+            
+            <div class="form-group">
+                <label>📧 Host Email *</label>
+                <input type="email" id="hostEmail" required>
+            </div>
+            
+            <div class="form-group">
+                <label>📝 Purpose of Visit *</label>
+                <textarea id="purpose" rows="3" required></textarea>
+            </div>
+
+            <!-- Camera Section -->
+            <div class="camera-section">
+                <label>📸 Capture Visitor Photo *</label>
+                <video id="video" autoplay muted playsinline></video>
+                <br>
+                <button id="captureBtn" onclick="capturePhoto()">📷 Capture Photo</button>
+                <canvas id="canvas" style="display: none;"></canvas>
+                <img id="photo" alt="Captured photo">
+            </div>
+
+            <button class="btn btn-success" onclick="submitVisitor()" id="submitBtn" disabled>
+                ✅ Check-in Visitor
+            </button>
+
+            <div id="status"></div>
+
+            <!-- QR Code Section -->
+            <div id="qrSection" class="qr-section">
+                <h3>✅ Check-in Successful!</h3>
+                <p>Share this QR code with visitor:</p>
+                <img id="qrCode" class="qr-code" src="">
+                <br>
+                <a id="whatsappLink" class="whatsapp-share" target="_blank">📱 Share on WhatsApp</a>
+                <br><br>
+                <button class="btn" onclick="newVisitor()">➕ New Visitor</button>
+            </div>
+
+            <!-- Recent Visitors -->
+            <div class="recent-visitors">
+                <h3>📋 Recent Visitors</h3>
+                <div id="visitorsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('token');
+        let stream, photoBase64, qrCodeData, currentUser = {};
+
+        // Check if already logged in
+        if (token) {
+            verifyToken();
+        }
+
+        // Start camera (works without login)
+        navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } 
+        }).then(s => {
+            stream = s;
+            const video = document.getElementById('video');
+            if (video) video.srcObject = stream;
+        }).catch(err => {
+            console.error('Camera error:', err);
+        });
+
+        async function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!username || !password) {
+                showStatus('Please enter username and password', 'error');
+                return;
+            }
+
+            try {
+                showStatus('Logging in...', 'success');
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await res.json();
+                console.log('Login response:', data); // Debug log
+                
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    token = data.token;
+                    currentUser = data.user;
+                    document.getElementById('loginModal').classList.add('hidden');
+                    document.getElementById('mainApp').classList.remove('hidden');
+                    document.getElementById('userInfo').textContent = `Logged in as: ${currentUser.username}`;
+                    loadVisitors();
+                    showStatus(`Welcome ${currentUser.username}!`, 'success');
+                } else {
+                    showStatus(data.error || 'Invalid credentials', 'error');
+                    console.error('Login failed:', data);
+                }
+            } catch (err) {
+                showStatus('Login failed: ' + err.message, 'error');
+                console.error('Login error:', err);
+            }
+        }
+
+        async function verifyToken() {
+            try {
+                const res = await fetch('/api/visitors', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    document.getElementById('loginModal').classList.add('hidden');
+                    document.getElementById('mainApp').classList.remove('hidden');
+                    loadVisitors();
+                } else {
+                    localStorage.removeItem('token');
+                    token = null;
+                }
+            } catch (err) {
+                localStorage.removeItem('token');
+                token = null;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            token = null;
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('status').innerHTML = '';
+            location.reload();
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const photo = document.getElementById('photo');
+            
+            if (!video.videoWidth) {
+                showStatus('Please wait for camera to load', 'error');
+                return;
+            }
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            photoBase64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+            photo.src = canvas.toDataURL('image/jpeg', 0.8);
+            photo.style.display = 'block';
+            video.style.display = 'none';
+            document.getElementById('captureBtn').textContent = '✅ Photo Captured';
+            document.getElementById('captureBtn').disabled = true;
+            document.getElementById('submitBtn').disabled = !token;
+            showStatus('Photo captured! Now login to submit.', 'success');
+        }
+
+        async function submitVisitor() {
+            if (!token) {
+                showStatus('Please login first!', 'error');
+                return;
+            }
+            
+            if (!photoBase64) {
+                showStatus('Please capture photo first!', 'error');
+                return;
+            }
+
+            const data = {
+                visitor_name: document.getElementById('visitorName').value.trim(),
+                mobile: document.getElementById('mobile').value.trim(),
+                host_employee: document.getElementById('hostEmployee').value.trim(),
+                host_email: document.getElementById('hostEmail').value.trim(),
+                purpose: document.getElementById('purpose').value.trim(),
+                photo_base64: photoBase64
+            };
+
+            // Validation
+            if (!data.visitor_name || !data.host_employee || !data.host_email || !data.purpose) {
+                showStatus('Please fill all required fields', 'error');
+                return;
+            }
+
+            try {
+                document.getElementById('submitBtn').textContent = '⏳ Processing...';
+                document.getElementById('submitBtn').disabled = true;
+                
+                const res = await fetch('/api/visitors', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await res.json();
+                console.log('Submit response:', result); // Debug log
+                
+                if (result.success) {
+                    document.getElementById('qrCode').src = result.qrCode;
+                    document.getElementById('whatsappLink').href = 
+                        `https://wa.me/91${data.mobile || '9876543210'}?text=🛡️%20Seeds%20Visitor%20Pass:%20${encodeURIComponent(result.qrCode)}`;
+                    document.getElementById('qrSection').style.display = 'block';
+                    showStatus(result.message, 'success');
+                    loadVisitors();
+                    setTimeout(newVisitor, 2000);
+                } else {
+                    showStatus(result.error || 'Check-in failed', 'error');
+                }
+            } catch (err) {
+                showStatus('Error: ' + err.message, 'error');
+                console.error('Submit error:', err);
+            } finally {
+                document.getElementById('submitBtn').textContent = '✅ Check-in Visitor';
+                document.getElementById('submitBtn').disabled = !photoBase64 || !token;
+            }
+        }
+
+        function newVisitor() {
+            document.getElementById('qrSection').style.display = 'none';
+            document.querySelectorAll('#mainApp input, #mainApp textarea').forEach(el => el.value = '');
+            resetCamera();
+            document.getElementById('visitorName').focus();
+        }
+
+        function resetCamera() {
+            const video = document.getElementById('video');
+            const photo = document.getElementById('photo');
+            const captureBtn = document.getElementById('captureBtn');
+            
+            if (photo) photo.style.display = 'none';
+            if (video) video.style.display = 'block';
+            captureBtn.textContent = '📷 Capture Photo';
+            captureBtn.disabled = false;
+            document.getElementById('submitBtn').disabled = true;
+            photoBase64 = null;
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => status.innerHTML = '', 5000);
+        }
+
+        async function loadVisitors() {
+            if (!token) return;
+            
+            try {
+                const res = await fetch('/api/visitors', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const visitors = await res.json();
+                
+                document.getElementById('visitorsList').innerHTML = visitors.slice(0, 5).map(v => `
+                    <div class="visitor-card">
+                        <strong>${v.visitor_name}</strong> | ${v.mobile || 'N/A'}<br>
+                        <small>👥 ${v.host_employee} | ⏰ ${new Date(v.checkin_time).toLocaleString()} 
+                        | ${v.status.replace('_', ' ').toUpperCase()}</small>
+                    </div>
+                `).join('') || '<p>No recent visitors</p>';
+            } catch (err) {
+                console.error('Load visitors error:', err);
+            }
+        }
+
+        // Enter key support
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                if (document.getElementById('loginModal').classList.contains('hidden')) {
+                    submitVisitor();
+                } else {
+                    login();
+                }
+            }
+        });
+
+        // Auto-refresh visitors every 30s (when logged in)
+        setInterval(() => {
+            if (token && !document.getElementById('loginModal').classList.contains('hidden')) {
+                loadVisitors();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

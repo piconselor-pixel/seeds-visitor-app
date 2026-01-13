@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>🔐 Seeds FinCap - Security Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #f5f7fa; min-height: 100vh; padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { 
+            background: white; padding: 30px; border-radius: 20px; 
+            text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 30px;
+        }
+        .header h1 { color: #007bff; font-size: 2.5em; margin-bottom: 10px; }
+        .stats-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 25px; margin: 30px 0;
+        }
+        .stat-card { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; padding: 35px; border-radius: 20px; text-align: center;
+            box-shadow: 0 15px 35px rgba(102,126,234,0.3);
+        }
+        .stat-number { font-size: 3.5em; font-weight: bold; margin-bottom: 10px; }
+        .stat-label { font-size: 1.1em; opacity: 0.95; }
+        .controls { 
+            background: white; padding: 25px; border-radius: 15px; 
+            margin-bottom: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            display: flex; gap: 15px; flex-wrap: wrap; align-items: center;
+        }
+        .controls input, .controls select { 
+            padding: 12px 20px; border: 2px solid #e1e5e9; border-radius: 10px;
+            font-size: 16px;
+        }
+        .btn { 
+            padding: 12px 25px; background: #007bff; color: white; 
+            border: none; border-radius: 10px; cursor: pointer; font-weight: 600;
+            text-decoration: none; display: inline-block; transition: all 0.3s;
+        }
+        .btn:hover { background: #0056b3; transform: translateY(-2px); }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        table { 
+            width: 100%; background: white; border-radius: 15px; 
+            overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        th { 
+            background: linear-gradient(45deg, #007bff, #0056b3); color: white; 
+            padding: 20px; text-align: left; font-weight: 600;
+        }
+        td { padding: 18px 20px; border-bottom: 1px solid #f1f3f4; }
+        tr:hover { background: #f8f9fa; }
+        .status-active { color: #28a745; font-weight: bold; }
+        .status-out { color: #dc3545; font-weight: bold; }
+        .status-checked_out { color: #6c757d; }
+        .action-btn { 
+            padding: 8px 16px; margin: 0 5px 5px 0; border-radius: 6px; 
+            font-size: 14px; cursor: pointer;
+        }
+        .logout { 
+            position: fixed; top: 20px; right: 20px; background: #dc3545; 
+            color: white; padding: 12px 20px; border-radius: 25px; cursor: pointer;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <button class="logout" onclick="logout()">🚪 Logout</button>
+    
+    <div class="container">
+        <!-- Login Modal -->
+        <div id="loginModal" class="header">
+            <h1>🔐 Admin Login</h1>
+            <p>Seeds FinCap Security Dashboard</p>
+            <div style="max-width: 400px; margin: 0 auto;">
+                <input type="text" id="adminUsername" placeholder="Username/Email" style="margin-bottom: 20px;">
+                <input type="password" id="adminPassword" placeholder="Password" style="margin-bottom: 20px;">
+                <button class="btn" onclick="adminLogin()" style="width: 100%;">Login</button>
+                <p style="margin-top: 15px; color: #666; font-size: 14px;">
+                    admin@seedsfincap.com / admin123
+                </p>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="hidden">
+            <div class="header">
+                <h1>🔐 Security Control Center</h1>
+                <p>Real-time visitor tracking & security audit</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid" id="statsGrid"></div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <input type="date" id="dateFilter">
+                <select id="statusFilter">
+                    <option value="">All Visitors</option>
+                    <option value="checked_in">Active Visitors</option>
+                    <option value="checked_out">Checked Out</option>
+                </select>
+                <button class="btn" onclick="loadVisitors()">🔄 Refresh</button>
+                <a href="/api/admin/export" class="btn btn-success" id="exportBtn">
+                    📊 Export 7-Day CSV Audit
+                </a>
+                <div style="margin-left: auto; font-weight: 600; color: #007bff;">
+                    Logged in as: <span id="currentUser"></span>
+                </div>
+            </div>
+
+            <!-- Visitors Table -->
+            <table id="visitorsTable">
+                <thead>
+                    <tr>
+                        <th>⏰ Check-in Time</th>
+                        <th>👤 Name</th>
+                        <th>📱 Mobile</th>
+                        <th>👥 Host</th>
+                        <th>📧 Email</th>
+                        <th>📝 Purpose</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('token');
+        const isAdmin = localStorage.getItem('admin-token');
+
+        if (isAdmin) {
+            token = isAdmin;
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('currentUser').textContent = 'Admin';
+            loadStats();
+            loadVisitors();
+        }
+
+        async function adminLogin() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                
+                if (data.token && data.user.role === 'admin') {
+                    localStorage.setItem('admin-token', data.token);
+                    token = data.token;
+                    document.getElementById('loginModal').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    document.getElementById('currentUser').textContent = data.user.username;
+                    loadStats();
+                    loadVisitors();
+                } else {
+                    alert('Admin access required!');
+                }
+            } catch (err) {
+                alert('Login failed: ' + err.message);
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/admin/stats', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const stats = await res.json();
+                
+                document.getElementById('statsGrid').innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.today.total_today}</div>
+                        <div class="stat-label">👥 Visitors Today</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #28a745;">${stats.today.active}</div>
+                        <div class="stat-label">🟢 Active Now</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #dc3545;">${stats.today.checked_out}</div>
+                        <div class="stat-label">🔴 Checked Out</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.allTime}</div>
+                        <div class="stat-label">📊 Total Lifetime</div>
+                    </div>
+                `;
+            } catch (err) {
+                console.error('Stats error:', err);
+            }
+        }
+
+        async function loadVisitors() {
+            try {
+                const date = document.getElementById('dateFilter').value;
+                const status = document.getElementById('statusFilter').value;
+                const params = new URLSearchParams();
+                if (date) params.append('date', date);
+                if (status) params.append('status', status);
+                
+                const res = await fetch(`/api/visitors?${params}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const visitors = await res.json();
+                
+                document.querySelector('#visitorsTable tbody').innerHTML = visitors.map(v => `
+                    <tr>
+                        <td>${new Date(v.checkin_time).toLocaleString()}</td>
+                        <td><strong>${v.visitor_name}</strong></td>
+                        <td>${v.mobile || 'N/A'}</td>
+                        <td>${v.host_employee || 'N/A'}</td>
+                        <td>${v.host_email}</td>
+                        <td style="max-width: 200px;">${(v.purpose || '').substring(0, 50)}${(v.purpose || '').length > 50 ? '...' : ''}</td>
+                        <td class="status-${v.status}">${v.status.replace('_', ' ').toUpperCase()}</td>
+                        <td>
+                            ${v.status === 'checked_in' ? 
+                                `<button class="action-btn btn-success" onclick="checkout(${v.id})">Check Out</button>` : 
+                                `<span style="color: #6c757d;">✅ Completed</span>`
+                            }
+                            <br>
+                            <a href="https://wa.me/91${v.mobile || '9876543210'}?text=Visitor%20status:%20${v.status}" 
+                               class="action-btn" style="background: #25D366;" target="_blank">📱 WhatsApp</a>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Visitors load error:', err);
+            }
+        }
+
+        async function checkout(id) {
+            if (confirm('Check out this visitor?')) {
+                try {
+                    await fetch(`/api/visitors/${id}/checkout`, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    loadVisitors();
+                    loadStats();
+                } catch (err) {
+                    alert('Checkout failed: ' + err.message);
+                }
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('admin-token');
+            location.reload();
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            if (!document.getElementById('loginModal').classList.contains('hidden')) return;
+            loadStats();
+            loadVisitors();
+        }, 30000);
+    </script>
+</body>
+</html>

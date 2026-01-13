@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>🛡️ Seeds FinCap - Visitor Check-in System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #ff9e00;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 16px;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --box-shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s ease;
+        }
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            min-height: 100vh; 
+            padding: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container { 
+            max-width: 900px; 
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        .app-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .logo-icon {
+            background: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: var(--primary);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .logo-text h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 2.2rem;
+            color: white;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            margin-bottom: 5px;
+        }
+        
+        .logo-text p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 300;
+        }
+        
+        .main-card { 
+            background: white; 
+            border-radius: var(--border-radius); 
+            padding: 40px; 
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .main-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+        }
+        
+        .card-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-subtitle {
+            color: var(--gray);
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group { 
+            margin-bottom: 0;
+        }
+        
+        .form-label { 
+            display: flex; 
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px; 
+            font-weight: 600; 
+            color: var(--dark);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+        }
+        
+        .form-control, .form-select { 
+            width: 100%; 
+            padding: 16px 18px; 
+            border: 2px solid var(--light-gray); 
+            border-radius: 12px; 
+            font-size: 16px; 
+            transition: var(--transition);
+            font-family: 'Roboto', sans-serif;
+            background-color: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            background-size: 16px;
+        }
+        
+        .form-select {
+            cursor: pointer;
+        }
+        
+        .form-control:focus, .form-select:focus { 
+            outline: none; 
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+        }
+        
+        .email-display {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            color: var(--gray);
+            cursor: not-allowed;
+        }
+        
+        .camera-section { 
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 30px; 
+            border-radius: 15px; 
+            text-align: center; 
+            margin: 35px 0;
+            border: 1px solid #dee2e6;
+        }
+        
+        .camera-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--dark);
+        }
+        
+        .camera-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        #video, #photo { 
+            width: 100%; 
+            height: 300px; 
+            object-fit: cover;
+            display: block;
+        }
+        
+        #photo {
+            border-radius: 12px;
+            display: none;
+        }
+        
+        .camera-controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .btn { 
+            padding: 16px 32px; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-primary:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #1e7e34);
+            color: white;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-success:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.4);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(45deg, #ff9e00, #ff8500);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 158, 0, 0.3);
+        }
+        
+        .btn-warning:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 158, 0, 0.4);
+        }
+        
+        .btn:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+            transform: none !important; 
+            box-shadow: none !important;
+        }
+        
+        .submit-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .status { 
+            padding: 18px; 
+            border-radius: 12px; 
+            margin: 20px 0; 
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .status.success { 
+            background: #e8f6ef; 
+            color: #0a5c36; 
+            border: 1px solid #b8e6cf; 
+        }
+        
+        .status.error { 
+            background: #fdeded; 
+            color: #8c1d1d; 
+            border: 1px solid #f5c6cb; 
+        }
+        
+        .qr-section { 
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+            padding: 35px; 
+            border-radius: 15px; 
+            text-align: center; 
+            margin-top: 35px; 
+            display: none;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .qr-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.5rem;
+            color: #155724;
+            margin-bottom: 10px;
+        }
+        
+        .qr-subtitle {
+            color: #0a5c36;
+            margin-bottom: 25px;
+        }
+        
+        .qr-code-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            display: inline-block;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+        
+        .qr-code { 
+            max-width: 200px; 
+            height: auto;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+        
+        .whatsapp-share { 
+            background: #25D366; 
+            color: white; 
+            padding: 16px 30px; 
+            text-decoration: none; 
+            border-radius: 12px; 
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+            transition: var(--transition);
+        }
+        
+        .whatsapp-share:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4);
+            color: white;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            padding-bottom: 20px;
+        }
+        
+        .hidden { 
+            display: none; 
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .main-card { 
+                padding: 30px; 
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+                display: block;
+            }
+            
+            .main-card { 
+                padding: 25px 20px; 
+                margin: 0 5px;
+            }
+            
+            .logo {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .logo-text h1 {
+                font-size: 1.8rem;
+            }
+            
+            .card-title {
+                font-size: 1.5rem;
+            }
+            
+            .camera-section {
+                padding: 20px;
+            }
+            
+            .camera-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .qr-section {
+                padding: 25px 20px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo-text h1 {
+                font-size: 1.5rem;
+            }
+            
+            .card-title {
+                font-size: 1.3rem;
+            }
+            
+            .form-control, .form-select {
+                padding: 14px 16px;
+            }
+            
+            #video, #photo {
+                height: 250px;
+            }
+            
+            .btn {
+                padding: 14px 24px;
+            }
+        }
+        
+        /* Tablet-specific optimizations */
+        @media (min-width: 481px) and (max-width: 1024px) {
+            .container {
+                max-width: 95%;
+            }
+            
+            .main-card {
+                padding: 30px;
+            }
+            
+            .logo {
+                flex-wrap: nowrap;
+            }
+            
+            .camera-container {
+                max-width: 500px;
+            }
+            
+            #video, #photo {
+                height: 350px;
+            }
+            
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .form-group:last-child {
+                grid-column: 1 / -1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- App Header -->
+        <div class="app-header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Seeds FinCap Visitor Check-in</h1>
+                    <p>Professional Reception Management System</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Check-in Form -->
+        <div class="main-card">
+            <h2 class="card-title"><i class="fas fa-user-check"></i> Visitor Check-in Form</h2>
+            <p class="card-subtitle">Please fill all required fields to register your visit</p>
+            
+            <!-- Visitor Information Form -->
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" for="visitorName">
+                        <i class="fas fa-user"></i> Visitor Name *
+                    </label>
+                    <input type="text" id="visitorName" class="form-control" placeholder="John Doe" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="mobile">
+                        <i class="fas fa-mobile-alt"></i> Mobile Number
+                    </label>
+                    <input type="tel" id="mobile" class="form-control" placeholder="9876543210">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="hostEmployee">
+                        <i class="fas fa-users"></i> Meeting With *
+                    </label>
+                    <select id="hostEmployee" class="form-select" required>
+                        <option value="">Select Employee</option>
+                        <option value="Subhash Acharya">Subhash Acharya</option>
+                        <option value="Avishek Sarkar">Avishek Sarkar</option>
+                        <option value="Manmath Sahoo">Manmath Sahoo</option>
+                        <option value="Abhishek Gautam">Abhishek Gautam</option>
+                        <option value="Pritesh Kumar">Pritesh Kumar</option>
+                        <option value="Punit Tiwari">Punit Tiwari</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="hostEmail">
+                        <i class="fas fa-envelope"></i> Host Email *
+                    </label>
+                    <input type="email" id="hostEmail" class="form-control email-display" placeholder="Select employee above" readonly required>
+                </div>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" for="purpose">
+                        <i class="fas fa-clipboard-list"></i> Purpose of Visit *
+                    </label>
+                    <select id="purpose" class="form-select" required>
+                        <option value="">Select Purpose</option>
+                        <option value="Meeting">Meeting</option>
+                        <option value="Documentation">Documentation</option>
+                        <option value="Interview">Interview</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="additionalNotes">
+                        <i class="fas fa-sticky-note"></i> Additional Notes (Optional)
+                    </label>
+                    <input type="text" id="additionalNotes" class="form-control" placeholder="Any additional information">
+                </div>
+            </div>
+
+            <!-- Camera Section -->
+            <div class="camera-section">
+                <h3 class="camera-title"><i class="fas fa-camera"></i> Capture Visitor Photo *</h3>
+                <div class="camera-container">
+                    <video id="video" autoplay muted playsinline></video>
+                    <img id="photo" alt="Captured photo">
+                </div>
+                <div class="camera-controls">
+                    <button class="btn btn-warning" id="captureBtn" onclick="capturePhoto()">
+                        <i class="fas fa-camera"></i> Capture Photo
+                    </button>
+                    <button class="btn btn-primary" id="retakeBtn" onclick="resetCamera()" style="display: none;">
+                        <i class="fas fa-redo"></i> Retake Photo
+                    </button>
+                </div>
+                <canvas id="canvas" class="hidden"></canvas>
+                <p style="margin-top: 15px; color: #6c757d; font-size: 0.9rem;">
+                    <i class="fas fa-info-circle"></i> Please allow camera access and ensure good lighting
+                </p>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="submit-section">
+                <button class="btn btn-success submit-btn" onclick="submitVisitor()" id="submitBtn" disabled>
+                    <i class="fas fa-check-circle"></i> Check-in Visitor & Send Notification
+                </button>
+                <div id="status"></div>
+            </div>
+
+            <!-- QR Code Section (Shows after successful check-in) -->
+            <div id="qrSection" class="qr-section">
+                <h3 class="qr-title"><i class="fas fa-check-circle"></i> Check-in Successful!</h3>
+                <p class="qr-subtitle">Share this QR code pass with the visitor for entry</p>
+                
+                <div class="qr-code-container">
+                    <img id="qrCode" class="qr-code" src="" alt="Visitor QR Code">
+                </div>
+                
+                <div class="action-buttons">
+                    <a id="whatsappLink" class="whatsapp-share" target="_blank">
+                        <i class="fab fa-whatsapp"></i> Share on WhatsApp
+                    </a>
+                    <button class="btn btn-primary" onclick="newVisitor()">
+                        <i class="fas fa-user-plus"></i> New Visitor
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>🛡️ Seeds FinCap Pvt Ltd | Visitor Management System v2.0</p>
+            <p>All visitor data is securely stored and managed</p>
+        </div>
+    </div>
+
+    <script>
+        let stream, photoBase64, qrCodeData;
+        const API_BASE = '/api';
+        
+        // Employee email mapping
+        const employeeEmails = {
+            'Subhash Acharya': 'subhash.acharya@seedsfincap.com',
+            'Avishek Sarkar': 'avishek.sarkar@seedsfincap.com',
+            'Manmath Sahoo': 'manmath.sahoo@seedsfincap.com',
+            'Abhishek Gautam': 'abhishek.kumar@seedsfincap.com',
+            'Pritesh Kumar': 'pritesh.kumar@seedsfincap.com',
+            'Punit Tiwari': 'punit.tiwari@seedsfincap.com'
+        };
+
+        // Start camera immediately
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'user', 
+                    width: { ideal: 640 }, 
+                    height: { ideal: 480 } 
+                } 
+            }).then(s => {
+                stream = s;
+                document.getElementById('video').srcObject = stream;
+            }).catch(err => {
+                console.error('Camera access denied:', err);
+                showStatus('Camera access is required for visitor check-in. Please allow camera access.', 'error');
+            });
+        }
+
+        // Initialize camera on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            startCamera();
+            
+            // Add event listener for host employee selection
+            document.getElementById('hostEmployee').addEventListener('change', function() {
+                const selectedEmployee = this.value;
+                const emailField = document.getElementById('hostEmail');
+                
+                if (selectedEmployee && employeeEmails[selectedEmployee]) {
+                    emailField.value = employeeEmails[selectedEmployee];
+                } else {
+                    emailField.value = '';
+                }
+            });
+        });
+
+        function capturePhoto() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const photo = document.getElementById('photo');
+            const captureBtn = document.getElementById('captureBtn');
+            const retakeBtn = document.getElementById('retakeBtn');
+            
+            if (!video.videoWidth) {
+                showStatus('Please wait for camera to load', 'error');
+                return;
+            }
+            
+            // Set canvas dimensions to match video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Draw video frame to canvas
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert canvas to base64 image
+            photoBase64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+            
+            // Display the captured photo
+            photo.src = canvas.toDataURL('image/jpeg', 0.8);
+            photo.style.display = 'block';
+            video.style.display = 'none';
+            
+            // Update button states
+            captureBtn.style.display = 'none';
+            retakeBtn.style.display = 'block';
+            document.getElementById('submitBtn').disabled = false;
+            
+            showStatus('Photo captured successfully! You can retake if needed.', 'success');
+        }
+
+        function resetCamera() {
+            const video = document.getElementById('video');
+            const photo = document.getElementById('photo');
+            const captureBtn = document.getElementById('captureBtn');
+            const retakeBtn = document.getElementById('retakeBtn');
+            
+            // Reset camera display
+            photo.style.display = 'none';
+            video.style.display = 'block';
+            
+            // Reset button states
+            captureBtn.style.display = 'block';
+            retakeBtn.style.display = 'none';
+            document.getElementById('submitBtn').disabled = true;
+            
+            // Clear photo data
+            photoBase64 = null;
+        }
+
+        async function submitVisitor() {
+            // Basic validation
+            const requiredFields = ['visitorName', 'hostEmployee', 'hostEmail', 'purpose'];
+            const emptyFields = [];
+            
+            for (let field of requiredFields) {
+                const element = document.getElementById(field);
+                if (!element.value.trim()) {
+                    emptyFields.push(field);
+                    element.style.borderColor = 'var(--danger)';
+                } else {
+                    element.style.borderColor = '';
+                }
+            }
+            
+            if (emptyFields.length > 0) {
+                showStatus('Please fill all required fields!', 'error');
+                return;
+            }
+            
+            if (!photoBase64) {
+                showStatus('Please capture visitor photo first!', 'error');
+                return;
+            }
+
+            // Prepare data for submission
+            const data = {
+                visitor_name: document.getElementById('visitorName').value.trim(),
+                mobile: document.getElementById('mobile').value.trim(),
+                host_employee: document.getElementById('hostEmployee').value.trim(),
+                host_email: document.getElementById('hostEmail').value.trim(),
+                purpose: document.getElementById('purpose').value.trim(),
+                additional_notes: document.getElementById('additionalNotes').value.trim(),
+                photo_base64: photoBase64
+            };
+            
+            try {
+                // Update UI for processing state
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                submitBtn.disabled = true;
+                
+                // Simulate API call (replace with actual API endpoint)
+                const res = await fetch(`${API_BASE}/visitors`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await res.json();
+                
+                if (result.success) {
+                    // Show QR code section
+                    qrCodeData = result.qrCode;
+                    document.getElementById('qrCode').src = qrCodeData;
+                    
+                    // Set up WhatsApp share link
+                    const mobile = data.mobile || '9876543210';
+                    document.getElementById('whatsappLink').href = 
+                        `https://wa.me/91${mobile}?text=🛡️%20Seeds%20FinCap%20Visitor%20Pass:%20${encodeURIComponent(window.location.origin + '/visitor-pass/' + result.visitorId)}`;
+                    
+                    // Display QR section
+                    document.getElementById('qrSection').style.display = 'block';
+                    
+                    // Show success message
+                    showStatus(result.message || 'Visitor check-in successful!', 'success');
+                    
+                    // Scroll to top to show QR code
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    showStatus(result.error || 'Check-in failed. Please try again.', 'error');
+                }
+            } catch (err) {
+                showStatus('Network error. Please check your connection and try again.', 'error');
+                console.error('Submit error:', err);
+            } finally {
+                // Reset submit button
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Check-in Visitor & Send Notification';
+                submitBtn.disabled = !photoBase64;
+            }
+        }
+
+        function newVisitor() {
+            // Hide QR section
+            document.getElementById('qrSection').style.display = 'none';
+            
+            // Reset form fields
+            document.getElementById('visitorName').value = '';
+            document.getElementById('mobile').value = '';
+            document.getElementById('hostEmployee').value = '';
+            document.getElementById('hostEmail').value = '';
+            document.getElementById('purpose').value = '';
+            document.getElementById('additionalNotes').value = '';
+            
+            // Reset camera
+            resetCamera();
+            
+            // Focus on first field
+            document.getElementById('visitorName').focus();
+            
+            // Clear status
+            document.getElementById('status').innerHTML = '';
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+            
+            status.innerHTML = `
+                <div class="status ${type}">
+                    <i class="${icon}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            // Auto-hide success messages after 8 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    status.innerHTML = '';
+                }, 8000);
+            }
+        }
+
+        // Enter key submits form when submit button is enabled
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('submitBtn').disabled) {
+                submitVisitor();
+            }
+        });
+    </script>
+</body>
+</html>
