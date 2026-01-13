@@ -441,6 +441,12 @@
             border: 1px solid #f5c6cb; 
         }
         
+        .status.info { 
+            background: #d1ecf1; 
+            color: #0c5460; 
+            border: 1px solid #bee5eb; 
+        }
+        
         .qr-section { 
             background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
             padding: 35px; 
@@ -522,6 +528,32 @@
         
         .hidden { 
             display: none; 
+        }
+        
+        .email-status {
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        .email-sending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .email-sent {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .email-failed {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
         
         /* Responsive Design */
@@ -796,6 +828,12 @@
                 </p>
             </div>
 
+            <!-- Email Status Display -->
+            <div id="emailStatus" class="email-status" style="display: none;">
+                <i class="fas fa-envelope"></i>
+                <span id="emailStatusText"></span>
+            </div>
+
             <!-- Submit Button -->
             <div class="submit-section">
                 <button class="btn btn-success submit-btn" onclick="submitVisitor()" id="submitBtn" disabled>
@@ -811,6 +849,12 @@
                 
                 <div class="qr-code-container">
                     <img id="qrCode" class="qr-code" src="" alt="Visitor QR Code">
+                </div>
+                
+                <!-- Email Notification Status -->
+                <div id="emailNotificationStatus" style="margin-bottom: 20px; padding: 15px; border-radius: 8px; display: none;">
+                    <i class="fas fa-envelope"></i>
+                    <span id="emailNotificationText"></span>
                 </div>
                 
                 <div class="action-buttons">
@@ -833,7 +877,7 @@
 
     <script>
         let stream, photoBase64, qrCodeData;
-        const API_BASE = '/api';
+        const API_BASE = 'http://localhost:3032'; // Change this to your backend URL
         
         // Employee email mapping
         const employeeEmails = {
@@ -1020,7 +1064,8 @@
                 host_email: document.getElementById('hostEmail').value.trim(),
                 purpose: document.getElementById('purpose').value.trim(),
                 additional_notes: document.getElementById('additionalNotes').value.trim(),
-                photo_base64: photoBase64
+                photo_base64: photoBase64,
+                checkin_time: new Date().toISOString()
             };
             
             try {
@@ -1029,24 +1074,57 @@
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
                 submitBtn.disabled = true;
                 
-                // Simulate API call (replace with actual API endpoint)
-                const res = await fetch(`${API_BASE}/visitors`, {
+                // Show email sending status
+                const emailStatus = document.getElementById('emailStatus');
+                emailStatus.className = 'email-status email-sending';
+                emailStatus.style.display = 'flex';
+                document.getElementById('emailStatusText').textContent = 'Sending email notification to host...';
+                
+                // Send data to backend API
+                const res = await fetch(`${API_BASE}/api/visitors`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify(data)
                 });
                 
                 const result = await res.json();
                 
                 if (result.success) {
+                    // Update email status
+                    emailStatus.className = 'email-status email-sent';
+                    document.getElementById('emailStatusText').innerHTML = 
+                        `<strong>✓ Email sent successfully to ${data.host_email}</strong>`;
+                    
                     // Show QR code section
-                    qrCodeData = result.qrCode;
+                    qrCodeData = result.qrCode || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="white"/><text x="100" y="100" font-family="Arial" font-size="14" fill="black" text-anchor="middle">QR Code: ${result.visitorId || "TEST"}</text></svg>';
                     document.getElementById('qrCode').src = qrCodeData;
                     
                     // Set up WhatsApp share link
                     const mobile = data.mobile || '9876543210';
+                    const visitorId = result.visitorId || Date.now().toString();
                     document.getElementById('whatsappLink').href = 
-                        `https://wa.me/91${mobile}?text=🛡️%20Seeds%20FinCap%20Visitor%20Pass:%20${encodeURIComponent(window.location.origin + '/visitor-pass/' + result.visitorId)}`;
+                        `https://wa.me/91${mobile}?text=${encodeURIComponent(`🛡️ Seeds FinCap Visitor Pass\nVisitor: ${data.visitor_name}\nMeeting: ${data.host_employee}\nPurpose: ${data.purpose}\nTime: ${new Date().toLocaleString()}\nID: ${visitorId}`)}`;
+                    
+                    // Show email notification status in QR section
+                    const emailNotification = document.getElementById('emailNotificationStatus');
+                    const emailNotificationText = document.getElementById('emailNotificationText');
+                    
+                    if (result.emailSent) {
+                        emailNotification.style.display = 'flex';
+                        emailNotification.style.backgroundColor = '#d4edda';
+                        emailNotification.style.color = '#155724';
+                        emailNotification.style.border = '1px solid #c3e6cb';
+                        emailNotificationText.innerHTML = `<strong>✓ Email notification sent to ${data.host_email}</strong>`;
+                    } else if (result.emailError) {
+                        emailNotification.style.display = 'flex';
+                        emailNotification.style.backgroundColor = '#f8d7da';
+                        emailNotification.style.color = '#721c24';
+                        emailNotification.style.border = '1px solid #f5c6cb';
+                        emailNotificationText.innerHTML = `<strong>⚠ Email notification failed: ${result.emailError}</strong>`;
+                    }
                     
                     // Display QR section
                     document.getElementById('qrSection').style.display = 'block';
@@ -1056,10 +1134,22 @@
                     
                     // Scroll to top to show QR code
                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                    
                 } else {
+                    // Update email status
+                    emailStatus.className = 'email-status email-failed';
+                    document.getElementById('emailStatusText').innerHTML = 
+                        `<strong>✗ Email sending failed: ${result.error || 'Unknown error'}</strong>`;
+                    
                     showStatus(result.error || 'Check-in failed. Please try again.', 'error');
                 }
             } catch (err) {
+                // Update email status
+                const emailStatus = document.getElementById('emailStatus');
+                emailStatus.className = 'email-status email-failed';
+                document.getElementById('emailStatusText').innerHTML = 
+                    '<strong>✗ Network error. Please check your connection and try again.</strong>';
+                
                 showStatus('Network error. Please check your connection and try again.', 'error');
                 console.error('Submit error:', err);
             } finally {
@@ -1084,6 +1174,9 @@
             
             // Reset camera
             resetCamera();
+            
+            // Hide email status
+            document.getElementById('emailStatus').style.display = 'none';
             
             // Focus on first field
             document.getElementById('visitorName').focus();
