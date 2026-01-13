@@ -1,257 +1,935 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>🛡️ Seeds FinCap - Visitor Check-in</title>
+    <title>🛡️ Seeds FinCap - Visitor Check-in System</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #ff9e00;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 16px;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --box-shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s ease;
+        }
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: 'Roboto', sans-serif; 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
             min-height: 100vh; 
             padding: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .container { max-width: 900px; margin: 0 auto; }
-        .login-modal, .checkin-form { 
+        
+        .container { 
+            max-width: 900px; 
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        /* Camera Permission Modal */
+        .camera-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        
+        .camera-modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transform: translateY(0);
+            animation: modalSlideIn 0.5s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-icon {
+            font-size: 60px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .modal-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 15px;
+        }
+        
+        .modal-text {
+            color: var(--gray);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .modal-btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Poppins', sans-serif;
+            min-width: 180px;
+        }
+        
+        .modal-btn-primary {
+            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .modal-btn-primary:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.4);
+        }
+        
+        .modal-btn-secondary {
+            background: #6c757d;
+            color: white;
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+        }
+        
+        .modal-btn-secondary:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 25px rgba(108, 117, 125, 0.4);
+        }
+        
+        .app-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .logo-icon {
+            background: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: var(--primary);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .logo-text h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 2.2rem;
+            color: white;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            margin-bottom: 5px;
+        }
+        
+        .logo-text p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 300;
+        }
+        
+        .main-card { 
             background: white; 
-            border-radius: 20px; 
+            border-radius: var(--border-radius); 
             padding: 40px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
-        .login-modal { max-width: 400px; margin: 100px auto; }
-        .logo { text-align: center; margin-bottom: 30px; }
-        .logo h1 { color: #007bff; font-size: 2.5em; }
-        .form-group { margin-bottom: 25px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
-        input, textarea, select { 
-            width: 100%; padding: 15px; border: 2px solid #e1e5e9; 
-            border-radius: 12px; font-size: 16px; transition: all 0.3s;
+        
+        .main-card.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
-        input:focus, select:focus, textarea:focus { 
-            outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+        
+        .main-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
         }
-        .btn { 
-            width: 100%; padding: 18px; background: linear-gradient(45deg, #007bff, #0056b3);
-            color: white; border: none; border-radius: 12px; font-size: 18px; 
-            font-weight: 600; cursor: pointer; transition: all 0.3s;
+        
+        .card-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,123,255,0.3); }
-        .btn-success { background: linear-gradient(45deg, #28a745, #1e7e34); }
-        .btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+        
+        .card-subtitle {
+            color: var(--gray);
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group { 
+            margin-bottom: 0;
+        }
+        
+        .form-label { 
+            display: flex; 
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px; 
+            font-weight: 600; 
+            color: var(--dark);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+        }
+        
+        .form-control, .form-select { 
+            width: 100%; 
+            padding: 16px 18px; 
+            border: 2px solid var(--light-gray); 
+            border-radius: 12px; 
+            font-size: 16px; 
+            transition: var(--transition);
+            font-family: 'Roboto', sans-serif;
+            background-color: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            background-size: 16px;
+        }
+        
+        .form-select {
+            cursor: pointer;
+        }
+        
+        .form-control:focus, .form-select:focus { 
+            outline: none; 
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+        }
+        
+        .email-display {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            color: var(--gray);
+            cursor: not-allowed;
+        }
+        
         .camera-section { 
-            background: #f8f9fa; padding: 25px; border-radius: 15px; 
-            text-align: center; margin: 25px 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 30px; 
+            border-radius: 15px; 
+            text-align: center; 
+            margin: 35px 0;
+            border: 1px solid #dee2e6;
         }
-        #video { width: 100%; max-width: 400px; height: 300px; border-radius: 15px; }
-        #photo { width: 100%; max-width: 400px; height: 300px; border-radius: 15px; display: none; }
-        #captureBtn { 
-            background: #ff6b35; color: white; border: none; padding: 15px 30px; 
-            border-radius: 50px; font-size: 16px; cursor: pointer; margin-top: 15px;
+        
+        .camera-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--dark);
         }
-        #captureBtn:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .camera-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        #video, #photo { 
+            width: 100%; 
+            height: 300px; 
+            object-fit: cover;
+            display: block;
+        }
+        
+        #photo {
+            border-radius: 12px;
+            display: none;
+        }
+        
+        .camera-controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .btn { 
+            padding: 16px 32px; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-primary:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #1e7e34);
+            color: white;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-success:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.4);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(45deg, #ff9e00, #ff8500);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 158, 0, 0.3);
+        }
+        
+        .btn-warning:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 158, 0, 0.4);
+        }
+        
+        .btn:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+            transform: none !important; 
+            box-shadow: none !important;
+        }
+        
+        .submit-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .status { 
+            padding: 18px; 
+            border-radius: 12px; 
+            margin: 20px 0; 
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .status.success { 
+            background: #e8f6ef; 
+            color: #0a5c36; 
+            border: 1px solid #b8e6cf; 
+        }
+        
+        .status.error { 
+            background: #fdeded; 
+            color: #8c1d1d; 
+            border: 1px solid #f5c6cb; 
+        }
+        
         .qr-section { 
-            background: #e8f5e8; padding: 25px; border-radius: 15px; 
-            text-align: center; margin-top: 25px; display: none;
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+            padding: 35px; 
+            border-radius: 15px; 
+            text-align: center; 
+            margin-top: 35px; 
+            display: none;
+            border: 1px solid #c3e6cb;
         }
-        .qr-code { max-width: 200px; margin: 0 auto; }
+        
+        .qr-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.5rem;
+            color: #155724;
+            margin-bottom: 10px;
+        }
+        
+        .qr-subtitle {
+            color: #0a5c36;
+            margin-bottom: 25px;
+        }
+        
+        .qr-code-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            display: inline-block;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+        
+        .qr-code { 
+            max-width: 200px; 
+            height: auto;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+        
         .whatsapp-share { 
-            display: inline-block; background: #25D366; color: white; 
-            padding: 15px 30px; text-decoration: none; border-radius: 50px; 
-            font-weight: 600; margin-top: 15px;
+            background: #25D366; 
+            color: white; 
+            padding: 16px 30px; 
+            text-decoration: none; 
+            border-radius: 12px; 
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+            transition: var(--transition);
         }
-        .status { padding: 15px; border-radius: 10px; margin: 20px 0; font-weight: 600; }
-        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .recent-visitors { margin-top: 40px; }
-        .visitor-card { 
-            background: white; padding: 20px; border-radius: 12px; 
-            margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        
+        .whatsapp-share:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4);
+            color: white;
         }
-        .hidden { display: none; }
-        .logout-btn { 
-            position: fixed; top: 20px; right: 20px; 
-            background: #dc3545; color: white; border: none; 
-            padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: 600;
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            padding-bottom: 20px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .footer.visible {
+            opacity: 1;
+        }
+        
+        .hidden { 
+            display: none; 
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .main-card { 
+                padding: 30px; 
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+                display: block;
+            }
+            
+            .main-card { 
+                padding: 25px 20px; 
+                margin: 0 5px;
+            }
+            
+            .logo {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .logo-text h1 {
+                font-size: 1.8rem;
+            }
+            
+            .card-title {
+                font-size: 1.5rem;
+            }
+            
+            .camera-section {
+                padding: 20px;
+            }
+            
+            .camera-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .qr-section {
+                padding: 25px 20px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                padding: 30px 20px;
+            }
+            
+            .modal-btn {
+                min-width: 140px;
+                padding: 12px 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo-text h1 {
+                font-size: 1.5rem;
+            }
+            
+            .card-title {
+                font-size: 1.3rem;
+            }
+            
+            .form-control, .form-select {
+                padding: 14px 16px;
+            }
+            
+            #video, #photo {
+                height: 250px;
+            }
+            
+            .btn {
+                padding: 14px 24px;
+            }
+            
+            .modal-buttons {
+                flex-direction: column;
+            }
+            
+            .modal-btn {
+                width: 100%;
+            }
+        }
+        
+        /* Tablet-specific optimizations */
+        @media (min-width: 481px) and (max-width: 1024px) {
+            .container {
+                max-width: 95%;
+            }
+            
+            .main-card {
+                padding: 30px;
+            }
+            
+            .logo {
+                flex-wrap: nowrap;
+            }
+            
+            .camera-container {
+                max-width: 500px;
+            }
+            
+            #video, #photo {
+                height: 350px;
+            }
+            
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .form-group:last-child {
+                grid-column: 1 / -1;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Login Modal (REQUIRED FOR SUBMIT) -->
-        <div id="loginModal" class="login-modal">
-            <div class="logo">
-                <h1>🔐 Reception Login</h1>
-                <p>Seeds FinCap Visitor System</p>
+    <!-- Camera Permission Modal -->
+    <div id="cameraModal" class="camera-modal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fas fa-camera"></i>
             </div>
-            <div class="form-group">
-                <input type="text" id="loginUsername" placeholder="admin@seedsfincap.com" value="admin@seedsfincap.com">
-            </div>
-            <div class="form-group">
-                <input type="password" id="loginPassword" placeholder="admin123" value="admin123">
-            </div>
-            <button class="btn" onclick="login()">🚀 Start Check-in</button>
-            <p style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
-                Default: admin@seedsfincap.com / admin123
+            <h2 class="modal-title">Camera Access Required</h2>
+            <p class="modal-text">
+                To proceed with visitor check-in, we need access to your camera to capture visitor photos.
+                This is a mandatory requirement for security purposes.
             </p>
+            <p class="modal-text">
+                <strong>No photos are stored permanently</strong> - they are only used for generating the visitor pass.
+            </p>
+            <div class="modal-buttons">
+                <button id="allowCameraBtn" class="modal-btn modal-btn-primary">
+                    <i class="fas fa-check-circle"></i> Allow Camera Access
+                </button>
+                <button id="denyCameraBtn" class="modal-btn modal-btn-secondary">
+                    <i class="fas fa-times-circle"></i> Continue Without Camera
+                </button>
+            </div>
         </div>
-
-        <!-- Main Check-in Form -->
-        <div id="mainApp" class="checkin-form hidden">
-            <button class="logout-btn" onclick="logout()">🚪 Logout</button>
-            
+    </div>
+    
+    <div class="container">
+        <!-- App Header -->
+        <div class="app-header">
             <div class="logo">
-                <h1>🛡️ Visitor Check-in</h1>
-                <p>Seeds FinCap Pvt Ltd - Reception</p>
-                <div id="userInfo" style="font-size: 14px; color: #666;"></div>
+                <div class="logo-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Seeds FinCap Visitor Check-in</h1>
+                    <p>Professional Reception Management System</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Check-in Form -->
+        <div id="mainCard" class="main-card">
+            <h2 class="card-title"><i class="fas fa-user-check"></i> Visitor Check-in Form</h2>
+            <p class="card-subtitle">Please fill all required fields to register your visit</p>
+            
+            <!-- Visitor Information Form -->
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" for="visitorName">
+                        <i class="fas fa-user"></i> Visitor Name *
+                    </label>
+                    <input type="text" id="visitorName" class="form-control" placeholder="John Doe" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="mobile">
+                        <i class="fas fa-mobile-alt"></i> Mobile Number
+                    </label>
+                    <input type="tel" id="mobile" class="form-control" placeholder="9876543210">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="hostEmployee">
+                        <i class="fas fa-users"></i> Meeting With *
+                    </label>
+                    <select id="hostEmployee" class="form-select" required>
+                        <option value="">Select Employee</option>
+                        <option value="Subhash Acharya">Subhash Acharya</option>
+                        <option value="Avishek Sarkar">Avishek Sarkar</option>
+                        <option value="Manmath Sahoo">Manmath Sahoo</option>
+                        <option value="Abhishek Gautam">Abhishek Gautam</option>
+                        <option value="Pritesh Kumar">Pritesh Kumar</option>
+                        <option value="Punit Tiwari">Punit Tiwari</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="hostEmail">
+                        <i class="fas fa-envelope"></i> Host Email *
+                    </label>
+                    <input type="email" id="hostEmail" class="form-control email-display" placeholder="Select employee above" readonly required>
+                </div>
             </div>
             
-            <div class="form-group">
-                <label>👤 Visitor Name *</label>
-                <input type="text" id="visitorName" required>
-            </div>
-            
-            <div class="form-group">
-                <label>📱 Mobile</label>
-                <input type="tel" id="mobile">
-            </div>
-            
-            <div class="form-group">
-                <label>👥 Meeting With *</label>
-                <input type="text" id="hostEmployee">
-            </div>
-            
-            <div class="form-group">
-                <label>📧 Host Email *</label>
-                <input type="email" id="hostEmail" required>
-            </div>
-            
-            <div class="form-group">
-                <label>📝 Purpose of Visit *</label>
-                <textarea id="purpose" rows="3" required></textarea>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" for="purpose">
+                        <i class="fas fa-clipboard-list"></i> Purpose of Visit *
+                    </label>
+                    <select id="purpose" class="form-select" required>
+                        <option value="">Select Purpose</option>
+                        <option value="Meeting">Meeting</option>
+                        <option value="Documentation">Documentation</option>
+                        <option value="Interview">Interview</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="additionalNotes">
+                        <i class="fas fa-sticky-note"></i> Additional Notes (Optional)
+                    </label>
+                    <input type="text" id="additionalNotes" class="form-control" placeholder="Any additional information">
+                </div>
             </div>
 
             <!-- Camera Section -->
             <div class="camera-section">
-                <label>📸 Capture Visitor Photo *</label>
-                <video id="video" autoplay muted playsinline></video>
-                <br>
-                <button id="captureBtn" onclick="capturePhoto()">📷 Capture Photo</button>
-                <canvas id="canvas" style="display: none;"></canvas>
-                <img id="photo" alt="Captured photo">
+                <h3 class="camera-title"><i class="fas fa-camera"></i> Capture Visitor Photo *</h3>
+                <div id="cameraPreview" class="camera-container" style="display: none;">
+                    <video id="video" autoplay muted playsinline></video>
+                    <img id="photo" alt="Captured photo">
+                </div>
+                <div id="noCameraMessage" style="text-align: center; padding: 30px; display: none;">
+                    <i class="fas fa-camera-slash" style="font-size: 60px; color: #6c757d; margin-bottom: 20px;"></i>
+                    <h3 style="color: var(--danger); margin-bottom: 15px;">Camera Not Available</h3>
+                    <p style="color: var(--gray); margin-bottom: 20px;">
+                        Camera access was denied or is not available. You cannot proceed without camera access.
+                    </p>
+                    <button class="btn btn-primary" onclick="requestCameraAccess()">
+                        <i class="fas fa-redo"></i> Try Again
+                    </button>
+                </div>
+                <div class="camera-controls">
+                    <button class="btn btn-warning" id="captureBtn" onclick="capturePhoto()" style="display: none;">
+                        <i class="fas fa-camera"></i> Capture Photo
+                    </button>
+                    <button class="btn btn-primary" id="retakeBtn" onclick="resetCamera()" style="display: none;">
+                        <i class="fas fa-redo"></i> Retake Photo
+                    </button>
+                </div>
+                <canvas id="canvas" class="hidden"></canvas>
+                <p style="margin-top: 15px; color: #6c757d; font-size: 0.9rem;">
+                    <i class="fas fa-info-circle"></i> Please allow camera access and ensure good lighting
+                </p>
             </div>
 
-            <button class="btn btn-success" onclick="submitVisitor()" id="submitBtn" disabled>
-                ✅ Check-in Visitor
-            </button>
+            <!-- Submit Button -->
+            <div class="submit-section">
+                <button class="btn btn-success submit-btn" onclick="submitVisitor()" id="submitBtn" disabled>
+                    <i class="fas fa-check-circle"></i> Check-in Visitor & Send Notification
+                </button>
+                <div id="status"></div>
+            </div>
 
-            <div id="status"></div>
-
-            <!-- QR Code Section -->
+            <!-- QR Code Section (Shows after successful check-in) -->
             <div id="qrSection" class="qr-section">
-                <h3>✅ Check-in Successful!</h3>
-                <p>Share this QR code with visitor:</p>
-                <img id="qrCode" class="qr-code" src="">
-                <br>
-                <a id="whatsappLink" class="whatsapp-share" target="_blank">📱 Share on WhatsApp</a>
-                <br><br>
-                <button class="btn" onclick="newVisitor()">➕ New Visitor</button>
+                <h3 class="qr-title"><i class="fas fa-check-circle"></i> Check-in Successful!</h3>
+                <p class="qr-subtitle">Share this QR code pass with the visitor for entry</p>
+                
+                <div class="qr-code-container">
+                    <img id="qrCode" class="qr-code" src="" alt="Visitor QR Code">
+                </div>
+                
+                <div class="action-buttons">
+                    <a id="whatsappLink" class="whatsapp-share" target="_blank">
+                        <i class="fab fa-whatsapp"></i> Share on WhatsApp
+                    </a>
+                    <button class="btn btn-primary" onclick="newVisitor()">
+                        <i class="fas fa-user-plus"></i> New Visitor
+                    </button>
+                </div>
             </div>
-
-            <!-- Recent Visitors -->
-            <div class="recent-visitors">
-                <h3>📋 Recent Visitors</h3>
-                <div id="visitorsList"></div>
-            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div id="footer" class="footer">
+            <p>🛡️ Seeds FinCap Pvt Ltd | Visitor Management System v2.0</p>
+            <p>All visitor data is securely stored and managed</p>
         </div>
     </div>
 
     <script>
-        let token = localStorage.getItem('token');
-        let stream, photoBase64, qrCodeData, currentUser = {};
+        let stream, photoBase64, qrCodeData;
+        const API_BASE = '/api';
+        
+        // Employee email mapping
+        const employeeEmails = {
+            'Subhash Acharya': 'subhash.acharya@seedsfincap.com',
+            'Avishek Sarkar': 'avishek.sarkar@seedsfincap.com',
+            'Manmath Sahoo': 'manmath.sahoo@seedsfincap.com',
+            'Abhishek Gautam': 'abhishek.kumar@seedsfincap.com',
+            'Pritesh Kumar': 'pritesh.kumar@seedsfincap.com',
+            'Punit Tiwari': 'punit.tiwari@seedsfincap.com'
+        };
 
-        // Check if already logged in
-        if (token) {
-            verifyToken();
-        }
-
-        // Start camera (works without login)
-        navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } 
-        }).then(s => {
-            stream = s;
-            const video = document.getElementById('video');
-            if (video) video.srcObject = stream;
-        }).catch(err => {
-            console.error('Camera error:', err);
+        // Show camera permission modal on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show the modal immediately
+            const modal = document.getElementById('cameraModal');
+            modal.classList.remove('hidden');
+            
+            // Set up event listeners for modal buttons
+            document.getElementById('allowCameraBtn').addEventListener('click', function() {
+                requestCameraAccess();
+            });
+            
+            document.getElementById('denyCameraBtn').addEventListener('click', function() {
+                showNoCameraMode();
+            });
+            
+            // Add event listener for host employee selection
+            document.getElementById('hostEmployee').addEventListener('change', function() {
+                const selectedEmployee = this.value;
+                const emailField = document.getElementById('hostEmail');
+                
+                if (selectedEmployee && employeeEmails[selectedEmployee]) {
+                    emailField.value = employeeEmails[selectedEmployee];
+                } else {
+                    emailField.value = '';
+                }
+            });
         });
 
-        async function login() {
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value;
+        // Request camera access
+        async function requestCameraAccess() {
+            try {
+                // Hide the modal
+                const modal = document.getElementById('cameraModal');
+                modal.classList.add('hidden');
+                
+                // Try to get camera access
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'user', 
+                        width: { ideal: 640 }, 
+                        height: { ideal: 480 } 
+                    } 
+                });
+                
+                // Show camera preview
+                document.getElementById('cameraPreview').style.display = 'block';
+                document.getElementById('noCameraMessage').style.display = 'none';
+                document.getElementById('captureBtn').style.display = 'block';
+                
+                // Start the camera
+                document.getElementById('video').srcObject = stream;
+                
+                // Show main content with animation
+                setTimeout(() => {
+                    document.getElementById('mainCard').classList.add('visible');
+                    document.getElementById('footer').classList.add('visible');
+                }, 300);
+                
+                showStatus('Camera access granted! You can now capture visitor photos.', 'success');
+                
+            } catch (err) {
+                console.error('Camera access denied:', err);
+                showNoCameraMode();
+                showStatus('Camera access is required for visitor check-in. Please allow camera access.', 'error');
+            }
+        }
+
+        // Show no camera mode
+        function showNoCameraMode() {
+            // Hide the modal
+            const modal = document.getElementById('cameraModal');
+            modal.classList.add('hidden');
             
-            if (!username || !password) {
-                showStatus('Please enter username and password', 'error');
-                return;
-            }
-
-            try {
-                showStatus('Logging in...', 'success');
-                const res = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                
-                const data = await res.json();
-                console.log('Login response:', data); // Debug log
-                
-                if (data.token) {
-                    localStorage.setItem('token', data.token);
-                    token = data.token;
-                    currentUser = data.user;
-                    document.getElementById('loginModal').classList.add('hidden');
-                    document.getElementById('mainApp').classList.remove('hidden');
-                    document.getElementById('userInfo').textContent = `Logged in as: ${currentUser.username}`;
-                    loadVisitors();
-                    showStatus(`Welcome ${currentUser.username}!`, 'success');
-                } else {
-                    showStatus(data.error || 'Invalid credentials', 'error');
-                    console.error('Login failed:', data);
-                }
-            } catch (err) {
-                showStatus('Login failed: ' + err.message, 'error');
-                console.error('Login error:', err);
-            }
-        }
-
-        async function verifyToken() {
-            try {
-                const res = await fetch('/api/visitors', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    document.getElementById('loginModal').classList.add('hidden');
-                    document.getElementById('mainApp').classList.remove('hidden');
-                    loadVisitors();
-                } else {
-                    localStorage.removeItem('token');
-                    token = null;
-                }
-            } catch (err) {
-                localStorage.removeItem('token');
-                token = null;
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('token');
-            token = null;
-            document.getElementById('loginModal').classList.remove('hidden');
-            document.getElementById('mainApp').classList.add('hidden');
-            document.getElementById('status').innerHTML = '';
-            location.reload();
+            // Show no camera message
+            document.getElementById('cameraPreview').style.display = 'none';
+            document.getElementById('noCameraMessage').style.display = 'block';
+            document.getElementById('captureBtn').style.display = 'none';
+            
+            // Show main content with animation
+            setTimeout(() => {
+                document.getElementById('mainCard').classList.add('visible');
+                document.getElementById('footer').classList.add('visible');
+            }, 300);
+            
+            showStatus('Camera access denied. You cannot check-in visitors without camera access.', 'error');
         }
 
         function capturePhoto() {
@@ -259,152 +937,186 @@
             const canvas = document.getElementById('canvas');
             const ctx = canvas.getContext('2d');
             const photo = document.getElementById('photo');
+            const captureBtn = document.getElementById('captureBtn');
+            const retakeBtn = document.getElementById('retakeBtn');
             
             if (!video.videoWidth) {
                 showStatus('Please wait for camera to load', 'error');
                 return;
             }
             
+            // Set canvas dimensions to match video
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0);
             
+            // Draw video frame to canvas
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert canvas to base64 image
             photoBase64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+            
+            // Display the captured photo
             photo.src = canvas.toDataURL('image/jpeg', 0.8);
             photo.style.display = 'block';
             video.style.display = 'none';
-            document.getElementById('captureBtn').textContent = '✅ Photo Captured';
-            document.getElementById('captureBtn').disabled = true;
-            document.getElementById('submitBtn').disabled = !token;
-            showStatus('Photo captured! Now login to submit.', 'success');
-        }
-
-        async function submitVisitor() {
-            if (!token) {
-                showStatus('Please login first!', 'error');
-                return;
-            }
             
-            if (!photoBase64) {
-                showStatus('Please capture photo first!', 'error');
-                return;
-            }
-
-            const data = {
-                visitor_name: document.getElementById('visitorName').value.trim(),
-                mobile: document.getElementById('mobile').value.trim(),
-                host_employee: document.getElementById('hostEmployee').value.trim(),
-                host_email: document.getElementById('hostEmail').value.trim(),
-                purpose: document.getElementById('purpose').value.trim(),
-                photo_base64: photoBase64
-            };
-
-            // Validation
-            if (!data.visitor_name || !data.host_employee || !data.host_email || !data.purpose) {
-                showStatus('Please fill all required fields', 'error');
-                return;
-            }
-
-            try {
-                document.getElementById('submitBtn').textContent = '⏳ Processing...';
-                document.getElementById('submitBtn').disabled = true;
-                
-                const res = await fetch('/api/visitors', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                const result = await res.json();
-                console.log('Submit response:', result); // Debug log
-                
-                if (result.success) {
-                    document.getElementById('qrCode').src = result.qrCode;
-                    document.getElementById('whatsappLink').href = 
-                        `https://wa.me/91${data.mobile || '9876543210'}?text=🛡️%20Seeds%20Visitor%20Pass:%20${encodeURIComponent(result.qrCode)}`;
-                    document.getElementById('qrSection').style.display = 'block';
-                    showStatus(result.message, 'success');
-                    loadVisitors();
-                    setTimeout(newVisitor, 2000);
-                } else {
-                    showStatus(result.error || 'Check-in failed', 'error');
-                }
-            } catch (err) {
-                showStatus('Error: ' + err.message, 'error');
-                console.error('Submit error:', err);
-            } finally {
-                document.getElementById('submitBtn').textContent = '✅ Check-in Visitor';
-                document.getElementById('submitBtn').disabled = !photoBase64 || !token;
-            }
-        }
-
-        function newVisitor() {
-            document.getElementById('qrSection').style.display = 'none';
-            document.querySelectorAll('#mainApp input, #mainApp textarea').forEach(el => el.value = '');
-            resetCamera();
-            document.getElementById('visitorName').focus();
+            // Update button states
+            captureBtn.style.display = 'none';
+            retakeBtn.style.display = 'block';
+            document.getElementById('submitBtn').disabled = false;
+            
+            showStatus('Photo captured successfully! You can retake if needed.', 'success');
         }
 
         function resetCamera() {
             const video = document.getElementById('video');
             const photo = document.getElementById('photo');
             const captureBtn = document.getElementById('captureBtn');
+            const retakeBtn = document.getElementById('retakeBtn');
             
-            if (photo) photo.style.display = 'none';
-            if (video) video.style.display = 'block';
-            captureBtn.textContent = '📷 Capture Photo';
-            captureBtn.disabled = false;
+            // Reset camera display
+            photo.style.display = 'none';
+            video.style.display = 'block';
+            
+            // Reset button states
+            captureBtn.style.display = 'block';
+            retakeBtn.style.display = 'none';
             document.getElementById('submitBtn').disabled = true;
+            
+            // Clear photo data
             photoBase64 = null;
+        }
+
+        async function submitVisitor() {
+            // Basic validation
+            const requiredFields = ['visitorName', 'hostEmployee', 'hostEmail', 'purpose'];
+            const emptyFields = [];
+            
+            for (let field of requiredFields) {
+                const element = document.getElementById(field);
+                if (!element.value.trim()) {
+                    emptyFields.push(field);
+                    element.style.borderColor = 'var(--danger)';
+                } else {
+                    element.style.borderColor = '';
+                }
+            }
+            
+            if (emptyFields.length > 0) {
+                showStatus('Please fill all required fields!', 'error');
+                return;
+            }
+            
+            if (!photoBase64) {
+                showStatus('Please capture visitor photo first!', 'error');
+                return;
+            }
+
+            // Prepare data for submission
+            const data = {
+                visitor_name: document.getElementById('visitorName').value.trim(),
+                mobile: document.getElementById('mobile').value.trim(),
+                host_employee: document.getElementById('hostEmployee').value.trim(),
+                host_email: document.getElementById('hostEmail').value.trim(),
+                purpose: document.getElementById('purpose').value.trim(),
+                additional_notes: document.getElementById('additionalNotes').value.trim(),
+                photo_base64: photoBase64
+            };
+            
+            try {
+                // Update UI for processing state
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                submitBtn.disabled = true;
+                
+                // Simulate API call (replace with actual API endpoint)
+                const res = await fetch(`${API_BASE}/visitors`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await res.json();
+                
+                if (result.success) {
+                    // Show QR code section
+                    qrCodeData = result.qrCode;
+                    document.getElementById('qrCode').src = qrCodeData;
+                    
+                    // Set up WhatsApp share link
+                    const mobile = data.mobile || '9876543210';
+                    document.getElementById('whatsappLink').href = 
+                        `https://wa.me/91${mobile}?text=🛡️%20Seeds%20FinCap%20Visitor%20Pass:%20${encodeURIComponent(window.location.origin + '/visitor-pass/' + result.visitorId)}`;
+                    
+                    // Display QR section
+                    document.getElementById('qrSection').style.display = 'block';
+                    
+                    // Show success message
+                    showStatus(result.message || 'Visitor check-in successful!', 'success');
+                    
+                    // Scroll to top to show QR code
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    showStatus(result.error || 'Check-in failed. Please try again.', 'error');
+                }
+            } catch (err) {
+                showStatus('Network error. Please check your connection and try again.', 'error');
+                console.error('Submit error:', err);
+            } finally {
+                // Reset submit button
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Check-in Visitor & Send Notification';
+                submitBtn.disabled = !photoBase64;
+            }
+        }
+
+        function newVisitor() {
+            // Hide QR section
+            document.getElementById('qrSection').style.display = 'none';
+            
+            // Reset form fields
+            document.getElementById('visitorName').value = '';
+            document.getElementById('mobile').value = '';
+            document.getElementById('hostEmployee').value = '';
+            document.getElementById('hostEmail').value = '';
+            document.getElementById('purpose').value = '';
+            document.getElementById('additionalNotes').value = '';
+            
+            // Reset camera
+            resetCamera();
+            
+            // Focus on first field
+            document.getElementById('visitorName').focus();
+            
+            // Clear status
+            document.getElementById('status').innerHTML = '';
         }
 
         function showStatus(message, type) {
             const status = document.getElementById('status');
-            status.innerHTML = `<div class="status ${type}">${message}</div>`;
-            setTimeout(() => status.innerHTML = '', 5000);
-        }
-
-        async function loadVisitors() {
-            if (!token) return;
+            const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
             
-            try {
-                const res = await fetch('/api/visitors', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const visitors = await res.json();
-                
-                document.getElementById('visitorsList').innerHTML = visitors.slice(0, 5).map(v => `
-                    <div class="visitor-card">
-                        <strong>${v.visitor_name}</strong> | ${v.mobile || 'N/A'}<br>
-                        <small>👥 ${v.host_employee} | ⏰ ${new Date(v.checkin_time).toLocaleString()} 
-                        | ${v.status.replace('_', ' ').toUpperCase()}</small>
-                    </div>
-                `).join('') || '<p>No recent visitors</p>';
-            } catch (err) {
-                console.error('Load visitors error:', err);
+            status.innerHTML = `
+                <div class="status ${type}">
+                    <i class="${icon}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            // Auto-hide success messages after 8 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    status.innerHTML = '';
+                }, 8000);
             }
         }
 
-        // Enter key support
+        // Enter key submits form when submit button is enabled
         document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                if (document.getElementById('loginModal').classList.contains('hidden')) {
-                    submitVisitor();
-                } else {
-                    login();
-                }
+            if (e.key === 'Enter' && !document.getElementById('submitBtn').disabled) {
+                submitVisitor();
             }
         });
-
-        // Auto-refresh visitors every 30s (when logged in)
-        setInterval(() => {
-            if (token && !document.getElementById('loginModal').classList.contains('hidden')) {
-                loadVisitors();
-            }
-        }, 30000);
     </script>
 </body>
 </html>
